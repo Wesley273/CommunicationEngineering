@@ -1,0 +1,14 @@
+%%
+clear
+b=[1,2,2,1];
+a=[1,13/24,5/8,1/3]; 
+n=0:63;
+fprintf('*******滤波器梯形形式*******')
+[K,C]=dir2ladr(b,a)
+figure; 
+h=impz(b,a,n);
+u=dstep(b,a,n);
+subplot(2,1,1),stem(n,h,'.'); 
+title('单位冲激响应'); 
+subplot(2,1,2),stem(u,'.'); 
+title('单位阶跃响应'); 

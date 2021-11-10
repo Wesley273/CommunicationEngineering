@@ -1,0 +1,44 @@
+function [al,hn,d,x,y,r,sample,judge,error]=baseband(flag,A,B,N,a,SNR)
+% ------------------------------------
+% 基带系统
+% flag为系统选择标志，'0'为非匹配型，'1'为匹配型
+% A为每码元周期内抽样点数
+% B为发送比特数
+% N为滤波器阶数
+% a为滚降因子
+% SNR为给定信噪比
+% Eb为平均每比特能量
+% ------------------------------------
+[al,d]=bipolarSource(B,A);
+tau=(N-1)/2;
+if flag==1
+    %匹配滤波型
+    hn=getFilter(N,a,flag);
+    x=conv(d,hn);
+    %计算平均每比特能量
+    Eb=sum(x.*x)/B;
+    y=x+gaussianNoise(SNR,Eb,length(x));
+    r=conv(y,hn);
+    %去除尾部2tau个无用点
+    r(length(r)-2*tau+1:length(r))=[];
+    %绘制眼图
+    eyeDiagram(4*A,r,2*tau)
+    %进行抽样判决
+    [sample,judge,error]=decision(al,r,A,2*tau);
+end
+if flag==0
+    %非匹配滤波型
+    hn=getFilter(N,a,flag);
+    x=conv(d,hn);
+    %计算平均每比特能量
+    Eb=sum(x.*x)/B;
+    %去掉尾部tau个无用点
+    x(length(x)-tau+1:length(x))=[];
+    y=x+gaussianNoise(SNR,Eb,length(x));
+    r=y;
+    %绘制眼图
+    eyeDiagram(4*A,r,tau)
+    %进行抽样判决
+    [sample,judge,error]=decision(al,r,A,tau);
+end
+end
